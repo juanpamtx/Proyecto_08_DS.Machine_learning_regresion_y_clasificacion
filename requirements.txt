@@ -1,0 +1,6 @@
+# Librerías necesarias para el proyecto
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
