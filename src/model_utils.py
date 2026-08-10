@@ -11,7 +11,14 @@ import seaborn as sns
 from sklearn.metrics import (
     mean_absolute_error,
     mean_squared_error,
-    r2_score
+    r2_score,
+    accuracy_score,
+    balanced_accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    confusion_matrix,
+    classification_report
 )
 
 
@@ -103,3 +110,115 @@ def graficar_residuos(y_real, y_pred):
     plt.ylabel("Residuo")
     plt.tight_layout()
     plt.show()
+
+
+def evaluar_clasificacion(y_real, y_pred):
+    """
+    Calcula las principales métricas de evaluación
+    para un modelo de clasificación binaria.
+
+    Se incluyen métricas globales y métricas específicas
+    para la clase minoritaria 0, correspondiente a los
+    estudiantes no aprobados.
+
+    Parameters
+    ----------
+    y_real : array-like
+        Valores reales de la variable objetivo.
+
+    y_pred : array-like
+        Clases predichas por el modelo.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Tabla con las métricas de clasificación.
+    """
+    accuracy = accuracy_score(y_real, y_pred)
+    balanced_accuracy = balanced_accuracy_score(y_real, y_pred)
+
+    precision_no_aprobado = precision_score(
+        y_real,
+        y_pred,
+        pos_label=0,
+        zero_division=0
+    )
+
+    recall_no_aprobado = recall_score(
+        y_real,
+        y_pred,
+        pos_label=0,
+        zero_division=0
+    )
+
+    f1_no_aprobado = f1_score(
+        y_real,
+        y_pred,
+        pos_label=0,
+        zero_division=0
+    )
+
+    metricas = pd.DataFrame({
+        "metrica": [
+            "Accuracy",
+            "Balanced accuracy",
+            "Precision no aprobado",
+            "Recall no aprobado",
+            "F1 no aprobado"
+        ],
+        "valor": [
+            accuracy,
+            balanced_accuracy,
+            precision_no_aprobado,
+            recall_no_aprobado,
+            f1_no_aprobado
+        ]
+    })
+
+    return metricas
+
+
+def graficar_matriz_confusion(y_real, y_pred, titulo):
+    """
+    Representa la matriz de confusión de un modelo
+    de clasificación binaria.
+    """
+    matriz = confusion_matrix(
+        y_real,
+        y_pred,
+        labels=[0, 1]
+    )
+
+    plt.figure(figsize=(6, 5))
+
+    sns.heatmap(
+        matriz,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        xticklabels=["No aprobado", "Aprobado"],
+        yticklabels=["No aprobado", "Aprobado"]
+    )
+
+    plt.title(titulo)
+    plt.xlabel("Clase predicha")
+    plt.ylabel("Clase real")
+    plt.tight_layout()
+    plt.show()
+
+
+def obtener_informe_clasificacion(y_real, y_pred):
+    """
+    Genera el informe de clasificación en formato DataFrame.
+    """
+    informe = classification_report(
+        y_real,
+        y_pred,
+        labels=[0, 1],
+        target_names=["No aprobado", "Aprobado"],
+        output_dict=True,
+        zero_division=0
+    )
+
+    return pd.DataFrame(informe).T
+  
